@@ -1,9 +1,23 @@
 {% extends "users/base.html" %}
+{% load static %}
 {% block content %}
-<main role="main" class="container">
+<style>
+    body{
+        background-color: #F1BA93 ;
+    }
+    
+</style>
+<main role="main" class="container" >
     <div class="row">
         <div class="col-md-8 mt-4">
             <div class="content-section">
-            
-            </div> 
+                <img src="{% static 'img/army.jpg' %}" style="margin-left:200px"alt="My image">
+                <br><br>
+                <h1>Welcome, how can we help you?</h1>
+            <br>
+            <a class="btn btn-outline-dark btn-lg btn-block" href ="{% url 'edit_graph' %}" >Edit the Map Layout</a>
+            <br><br>
+            <a class="btn btn-outline-dark btn-lg btn-block" href ="{% url 'input' %}" >Decode The Enemy Message</a>
+            <br>
+        </div> 
 {% endblock content %}
