@@ -32,8 +32,7 @@ urlpatterns = [
     path('profile/', user_views.profile, name='profile'),
     path('graph/', graph_views.view_graph, name='view_graph'),
     path('input/', graph_views.post_new, name='input'),
-
-
+    path('graph/', graph_views.view_graph, name='view_graph'),
 ]
 
 if settings.DEBUG:

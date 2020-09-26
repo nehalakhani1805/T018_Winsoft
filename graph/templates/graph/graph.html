@@ -1,10 +1,439 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+{% extends 'users/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+	<main role="main" class="container">
+        <div class="row">
+            <div class="col-md-8 mt-4">
+            	<div class="content-section">
+                
+                </div> 
+                    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/addons/p5.dom.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/addons/p5.sound.min.js"></script>-->
+                    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+                    <script> 
+                        var data = JSON.parse("{{data|escapejs}}"); 
+                        //dataNode = document.getElementById('neatdata'); 
+                        var goals=data['goals'];
+                        console.log(goals);
+                        var sources=data['sources'];
+                        /* 	Dijekstra's algorithm implemented
+*		on an undirected graph.
+*		Play with the variables!
+*/
+
+// define coords of some nodes (or vertices)
+var v0 = [50, 150];
+var v1 = [150, 250];
+var v2 = [150, 150];
+var v3 = [150, 50];
+var v4 = [250, 250];
+var v5 = [250, 150];
+var v6 = [250, 50];
+var v7 = [350, 150];
+var v8 = [450, 250];
+var v9 = [450, 50];
+var v10 = [550, 150];
+// create list of nodes
+var V = [v0,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10];
+var labels=['A','B','C','D','E','F','G','H','I','J','K'];
+
+// create list of edges
+var E = [	[0, 1],
+            [0, 2],
+         	[0, 3],
+  			[1, 4],
+         	[2, 4],
+  			[2, 5],
+  			[3, 5],
+            [3, 6],
+         	[4, 7],
+            [6, 7],
+  			[7, 8],
+         	[7, 9],
+            [8,10],
+            [9,10]
+        ];
+/*
+// define coords of some nodes (or vertices)
+var v0 = [200, 50];
+var v1 = [50, 100];
+var v2 = [200, 100];
+var v3 = [250, 100];
+var v4 = [350, 200];
+var v5 = [100, 300];
+var v6 = [50, 250];
+var v7 = [300, 350];
+
+// create list of nodes
+var V = [v0, v1, v2, v3, v4, v5, v6, v7];
+
+// create list of edges
+var E = [	[0, 1],
+          [0, 2],
+          [1, 7],
+          [0, 3],
+         	[1, 5],
+  			  [2, 4],
+  			  [7, 3],
+          [2, 6],
+         	[7, 5],
+          [3, 5],
+  	    	[4, 5],
+          [4, 7]   ];
+           
+*/
+// create another list to store reference to 
+// best 'landing' edge for each node
+// this can be used to plot best route later
+var bestRoutes = new Array(V.length);
+// generate an adjacency list
+var A = [];
+for (var i=0;i<V.length;i++) {
+  A.push(findNeighbours(V[i]));
+}
+
+// initialise some edge coord variables
+var x1, x2, y1, y2 = 0;
+var useful = [0,-1,0];
+//var goals=[3,9];
+//var sources=[0,1,2,10,5,6,7,8,11];
+var visited = []
+var togo;
+var twogoals;
+function setup() {
+  createCanvas(5000, 5000);
+  //scale(1,-1);
+  rectMode(CENTER);
+  background(255); //bg color
+  // Set text characteristics
+  textSize(16);
+  textAlign(CENTER, CENTER);
+  // calc weightings of edges
+	var W = calcWeights();
+  // initialise source node at 0
+
+  var minimum=100000;
+  for(let i = 0;i < V.length;i++){
+        visited.push(0);
+      }
+  for(var j=0;j<sources.length;j++){
+      bestRoutes = new Array(V.length);
+      var sum=0;
+      for(let i = 0;i < V.length;i++){
+        visited[i]=0;
+      }
+      
+      var source = sources[j];
+      //visited[source] = 1;
+      togo = source;
+    // initialise goal node
+      //var goal = 7;
+    // initalise distances array
+    var D = initDistances(source);
+    console.log(D);
+    // for each node update distance array
+    //for (var i=0;i<V.length;i++) {
+      //D = updateDistances(V[i], A, W, D);   
+    //}  
+    for(var temp1=0;temp1<V.length;temp1++){
+        var tempmin=1000000;
+        for(var temp2=0;temp2<V.length;temp2++){
+          if(visited[temp2]==0 && D[temp2]<tempmin)
+          {
+            tempmin=D[temp2];
+            togo=temp2;
+          }
+            
+        }
+        if(visited[togo]==0){
+          visited[togo]=1;
+          D = updateDistances(V[togo], A, W, D); 
+        }
+        
+    }
+    for(var k=0;k<goals.length;k++){
+    sum = sum + D[goals[k]];
+    } 
+    console.log("sum for "+ labels[source] + " is "+ sum);
     
-</body>
-</html>
+    
+    if(sum==minimum){
+      if(goals.length==2){
+        let c1 = goals[0];
+        let c2 = goals[1];
+        let tc1 = 0;
+        let tc2 = 0;
+        while(c1!=source){
+          var tempo=bestRoutes[c1];
+          var tempo2=E[tempo][0];
+          if(tempo2==c1)
+            tempo2=E[tempo][1];
+            x1 = V[ E[bestRoutes[c1]][0] ][0];
+            y1 = V[ E[bestRoutes[c1]][0] ][1];
+            x2 = V[ E[bestRoutes[c1]][1] ][0];
+            y2 = V[ E[bestRoutes[c1]][1] ][1];
+            tc1 += dist(x1, y1, x2, y2);
+          c1=tempo2;
+        }
+        while(c2!=source){
+          var tempo=bestRoutes[c2];
+          var tempo2=E[tempo][0];
+          if(tempo2==c2)
+            tempo2=E[tempo][1];
+            x1 = V[ E[bestRoutes[c2]][0] ][0];
+            y1 = V[ E[bestRoutes[c2]][0] ][1];
+            x2 = V[ E[bestRoutes[c2]][1] ][0];
+            y2 = V[ E[bestRoutes[c2]][1] ][1];
+            tc2 += dist(x1, y1, x2,y2);
+          c2=tempo2;
+        }
+        if(Math.abs(tc2-tc1) < twogoals){
+          useful[0] = source;
+          useful[2] = bestRoutes;
+          twogoals = Math.abs(tc2-tc1);
+        }
+      }
+      
+    }
+          //check if diff of dist of useful[0] from the goals is greater than diff of dist of source from goals
+          //change useful[0] to source
+    if(sum<minimum){
+      //console.log("Reached assignment" + sum);
+     
+      if(goals.length == 2){
+        let c1 = goals[0];
+        let c2 = goals[1];
+        let tc1 = 0;
+        let tc2 = 0;
+        while(c1!=source){
+          var tempo=bestRoutes[c1];
+          var tempo2=E[tempo][0];
+          if(tempo2==c1)
+            tempo2=E[tempo][1];
+            x1 = V[ E[bestRoutes[c1]][0] ][0];
+            y1 = V[ E[bestRoutes[c1]][0] ][1];
+            x2 = V[ E[bestRoutes[c1]][1] ][0];
+            y2 = V[ E[bestRoutes[c1]][1] ][1];
+            tc1 += dist(x1, y1, x2,y2);
+          c1=tempo2;
+        }
+        while(c2!=source){
+          var tempo=bestRoutes[c2];
+          var tempo2=E[tempo][0];
+          if(tempo2==c2)
+            tempo2=E[tempo][1];
+            x1 = V[ E[bestRoutes[c2]][0] ][0];
+            y1 = V[ E[bestRoutes[c2]][0] ][1];
+            x2 = V[ E[bestRoutes[c2]][1] ][0];
+            y2 = V[ E[bestRoutes[c2]][1] ][1];
+            tc2 += dist(x1, y1, x2, y2);
+          c2=tempo2;
+        }
+        twogoals = Math.abs(tc1-tc2);
+      }
+      minimum=sum;
+      useful[0] = source;
+      useful[1] = sum;
+      useful[2] = bestRoutes;
+    }
+  }
+  console.log("This is useful " + useful[2]);
+  console.log(bestRoutes);
+  stroke(0); //line color
+  strokeWeight(1);//line wt
+  // plot edges first
+  for (var il=0; il<E.length; il++) {
+    x1 = V[ E[il][0] ][0];
+    y1 = V[ E[il][0] ][1];
+    x2 = V[ E[il][1] ][0];
+    y2 = V[ E[il][1] ][1];
+    line(x1, y1, x2, y2);
+  }
+  for(var l = 0;l < goals.length;l++){
+    // plot best route
+    console.log(l);
+    plotBestRoute(goals[l]);
+    console.log("Best routes done");
+    // plot nodes second
+    plotNodes(useful[0], goals[l]); 
+    console.log("nodes done");
+  }
+   
+}
+function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+   }
+function draw() {
+  
+}
+
+/* ------ Helper functions ------ */
+
+function initDistances(source) {
+	/* 	initialises an array for storing distances
+  *		corresponds to Step 1 in Dijekstra's SPA
+  *		param: the integer index of the source node
+  *		rtype: returns an array
+  */
+	var D = new Array(V.length);
+	for (var i=0; i<V.length; i++) {
+  	// set source node initial distance = 0
+  	if (i==source) {
+    	D[i] = 0;
+  	// all other nodes are Infinity
+  	} else {
+    	D[i] = Infinity;
+  	}
+  }
+  return D;
+}
+
+function calcWeights() {
+  /*	calculate the weightings of the edges.
+  *		these will be the geometrical distances 
+  *		between connected nodes.
+  *		rtype: array
+  */
+  var W = new Array(E.length);
+  for (var i=0;i<W.length;i++) {
+    W[i] = dist(V[E[i][0]][0], V[E[i][0]][1], V[E[i][1]][0], V[E[i][1]][1]);
+  }
+  return W;
+}
+
+function distNeighbours(node, neighbours) {
+  /*	find distances to specified neighbours
+  *		of a specified node
+  */
+  var dn = [];
+  for (var i=0;i<neighbours.length;i++) {
+    dn.push(dist(node[0], node[1], V[neighbours[i]][0], V[neighbours[i]][1]));  
+  }
+  return dn;
+}
+
+function findNeighbours(node) {
+  /*	get indices of neighbours as array
+  *		rtype: array of indices
+  */
+  var neighbours = [];
+  var x = 0; // initialise an index at 0
+  for (var i=0;i<E.length;i++) {
+    // if node index is in the array
+    if( E[i].includes( V.indexOf(node) ) ) {
+      x = E[i].indexOf( V.indexOf(node) );
+      x = 1 - x; // switches index to that of other vertex
+    	// add the index to the list of neighbours
+      neighbours.push(E[i][x]);
+    }
+  }
+  return neighbours;
+}
+
+function getEdgeIndex(i1, i2) {
+  /*	get the edge index for 2
+  *		neighbouring nodes
+  *		param i1: first node
+  *		param i2: neighbouring node
+  */
+  for (var i=0;i<E.length;i++) {
+    if (E[i].includes(i1) && E[i].includes(i2)) {
+      return i;
+    }
+  }
+}
+
+function updateDistances(node, A, W, D) {
+  /*	update the values in the distance matrix
+  *		for the specified node.
+  *		param node: node being visited
+  *		param W: weightings array
+  *		param A: adjacency list as nested array
+  *		param D: distance array
+  */
+ let somemin = Infinity;
+  for (var i=0;i<D.length;i++) {
+    // check if we're on a neighbour
+    if (A[V.indexOf(node)].includes(i)) {
+      // and which edge index is it?
+      var Ei = getEdgeIndex(V.indexOf(node),i);
+      // if it's never been visited, use its edge 
+      // weight to update distance
+      if (D[i] == Infinity) {        
+        D[i] = D[V.indexOf(node)] + W[Ei];
+        bestRoutes[i] = Ei;
+      } else if ( (D[V.indexOf(node)] + W[Ei]) < D[i] ) {
+        // it has been visited before, so...
+        // if distance on this node + edge weight to neighbour
+        // is less than distance currently on neighbour, update it
+        D[i] = D[V.indexOf(node)] + W[Ei];
+        bestRoutes[i] = Ei;
+      }
+    }
+  }
+  return D;
+}
+var colourchange2=0;
+function plotBestRoute(goal) {
+  /*	plots the best route to
+  *		the goal node from the source
+  */
+ console.log("Goal is "+ goal);
+  var reached = false;
+  var count = goal;  
+  stroke(0,255,0);
+  colourchange2+=100;
+  colourchange2%=255;
+  strokeWeight(5);
+  console.log(useful[2]);
+  while(count!=useful[0]){
+    var tempo=useful[2][count];
+    var tempo2=E[tempo][0];
+    if(tempo2==count)
+      tempo2=E[tempo][1];
+    x1 = V[ E[useful[2][count]][0] ][0];
+    y1 = V[ E[useful[2][count]][0] ][1];
+    x2 = V[ E[useful[2][count]][1] ][0];
+    y2 = V[ E[useful[2][count]][1] ][1];
+    line(x1,y1,x2,y2);
+    count=tempo2;
+  }
+}
+function plotNodes(source, goal) {
+  /*	plots the nodes of the graph
+  *		at the x,y coordinates specified
+  *		in the list of vertices, V
+  *		param V: array of vertices
+  *		param source: index of start node
+  *		param goal: index of goal node
+  */
+  stroke(0);
+  var colourchange = 0;
+  for (var i=0; i<V.length; i++) {
+    // make the source node red
+    if (i==useful[0]) {
+      fill(0,0,255);
+    // make goal node green
+    } else if (goals.includes(i)) {
+      fill(255,0,0);
+      //fill(0+colourchange,50+colourchange,0+colourchange);
+    } else {
+      fill(0);
+    }
+    ellipse(V[i][0], V[i][1], 30, 30);
+    fill(255);
+    text(labels[i], V[i][0]-15, V[i][1]-24);
+    colourchange = colourchange + 30;
+  }  
+}
+                    
+                    </script>
+
+				</div>
+                <br>
+			</div>
+		</div>
+	</main>
+{% endblock %}
+

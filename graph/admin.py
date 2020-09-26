@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Input
+from .models import Input, Vertex, Edge
 
 admin.site.register(Input)
-# Register your models here.
+admin.site.register(Vertex)
+admin.site.register(Edge)
