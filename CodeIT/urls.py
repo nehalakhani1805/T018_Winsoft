@@ -18,22 +18,27 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path
+from django.urls import path, include
 from users import views as user_views
+#from predictor import views as predictor_views
 from graph import views as graph_views
 
-
 urlpatterns = [
-    path('',auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('admin/', admin.site.urls),
+    path('',graph_views.home,name='home'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path('signup/', user_views.signup, name='signup'),
     path('profile/', user_views.profile, name='profile'),
-    path('graph/', graph_views.view_graph, name='view_graph'),
+    #path('classify/', predictor_views.call_model.as_view(), name='classify'),
     path('input/', graph_views.post_new, name='input'),
     path('graph/', graph_views.view_graph, name='view_graph'),
-]
+    path('add_node/',graph_views.add_node, name='add_node'),
+    path('delete_node/',graph_views.delete_node, name='delete_node'),
+    path('add_edge/',graph_views.add_edges, name='add_edge'),
+    path('delete_edge/',graph_views.delete_edges,name='delete_edge'),
+    path('edit_graph/',graph_views.edit_graph, name='edit_graph')
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

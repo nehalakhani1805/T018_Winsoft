@@ -17,13 +17,18 @@
                         var goals=data['goals'];
                         console.log(goals);
                         var sources=data['sources'];
+                        var V=data['V'];
+                        console.log(V);
+                        var E=data['E'];
+                        var labels=data['labels'];
+                        var labels2=data['labels2'];
                         /* 	Dijekstra's algorithm implemented
 *		on an undirected graph.
 *		Play with the variables!
 */
 
 // define coords of some nodes (or vertices)
-var v0 = [50, 150];
+/*var v0 = [50, 150];
 var v1 = [150, 250];
 var v2 = [150, 150];
 var v3 = [150, 50];
@@ -35,11 +40,11 @@ var v8 = [450, 250];
 var v9 = [450, 50];
 var v10 = [550, 150];
 // create list of nodes
-var V = [v0,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10];
-var labels=['A','B','C','D','E','F','G','H','I','J','K'];
+var V = [v0,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10];*/
+//var labels=['A','B','C','D','E','F','G','H','I','J','K'];
 
 // create list of edges
-var E = [	[0, 1],
+/*var E = [	[0, 1],
             [0, 2],
          	[0, 3],
   			[1, 4],
@@ -53,7 +58,7 @@ var E = [	[0, 1],
          	[7, 9],
             [8,10],
             [9,10]
-        ];
+        ];*/
 /*
 // define coords of some nodes (or vertices)
 var v0 = [200, 50];
@@ -102,12 +107,12 @@ var visited = []
 var togo;
 var twogoals;
 function setup() {
-  createCanvas(5000, 5000);
+  createCanvas(700, 300);
   //scale(1,-1);
   rectMode(CENTER);
-  background(255); //bg color
+  background(230); //bg color
   // Set text characteristics
-  textSize(16);
+  textSize(12);
   textAlign(CENTER, CENTER);
   // calc weightings of edges
 	var W = calcWeights();
@@ -423,13 +428,14 @@ function plotNodes(source, goal) {
     }
     ellipse(V[i][0], V[i][1], 30, 30);
     fill(255);
-    text(labels[i], V[i][0]-15, V[i][1]-24);
+    text(labels2[i], V[i][0]-15, V[i][1]-24);
+    //text(V[i][0], V[i][0]-15, V[i][1]-24);
     colourchange = colourchange + 30;
   }  
 }
                     
                     </script>
-
+                   
 				</div>
                 <br>
 			</div>

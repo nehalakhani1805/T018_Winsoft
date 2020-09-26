@@ -3,14 +3,18 @@ import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import Input
+from .models import Input, Vertex, Edge
 from django.http import JsonResponse
-from .forms import InputForm
+from .forms import InputForm, AddNodeForm, DeleteNodeForm, AddEdgeForm, DeleteEdgeForm
+
 
 # Create your views here.
+
 dMessage = ''
 ChineseBases = ''
 
+def home(request):
+    return render(request, 'graph/home.html')
 
 @login_required
 def post_new(request):
@@ -18,7 +22,9 @@ def post_new(request):
     global dMessage
     if request.method == "POST":
         form = InputForm(request.POST)
+       
         if form.is_valid():
+       
             input = form.save(commit=False)
             input.user = request.user
             input.save()
@@ -78,8 +84,12 @@ def post_new(request):
                 "couldn't": 0
             }
             not_words = ['not', "haven't", "didn't", "couldn't"]
-            all_chini_places = ['khardung la', 'lachulung la', 'sasser pass', 'gyong la', 'sia la', 'zoji la',
-                                'indira col', 'rezang la', 'tanglang la', 'pensi la', 'marsimik la']
+            vertices=Vertex.objects.all()
+            all_chini_places = []
+            for vertex in vertices:
+                all_chini_places.append(str(vertex.name))
+            # all_chini_places = ['khardung la', 'lachulung la', 'sasser pass', 'gyong la', 'sia la', 'zoji la',
+                                # 'indira col', 'rezang la', 'tanglang la', 'pensi la', 'marsimik la']
             chini_places = []
 
             flag = 0
@@ -96,8 +106,6 @@ def post_new(request):
                     if place in chini_places:
                         all_chini_places.remove(place)
                 print(all_chini_places)
-
-
                 ChineseBases = all_chini_places
             else:
                 print(chini_places)
@@ -110,39 +118,326 @@ def post_new(request):
 
     return render(request, 'graph/post_input.html', {'form': form, 'dMessage': dMessage, 'ChineseBases': ChineseBases})
 
-
 @login_required
 def view_graph(request):
-    data_dict = {
-        'khardung la': 0,
-        'lachulung la': 0,
-        'sasser pass': 0,
-        'gyong la': 0,
-        'sia la': 0,
-        'zoji la': 0,
-        'indira col': 0,
-        'rezang la': 0,
-        'tanglang la': 0,
-        'pensi la': 0,
-        'marsimik la': 0,
-    }
+    vertices=Vertex.objects.all()
+    v=[] 
+    labels=[] 
+    ch=65
+    for vertex in vertices:
+        v1=[]
+        v1.append(vertex.x_val)
+        v1.append(vertex.y_val)
+        v.append(v1)
+        labels.append(str(vertex.code))
+        ch=ch+1
+    #labels.sort()
+    print(v)
+    print(labels)
+    edges=Edge.objects.all()
+    ed=[]
+    for edge in edges:
+        e=[]
+        e.append(labels.index(str(edge.v_one)))
+        e.append(labels.index(str(edge.v_two)))
+        #e.append(ord(str(edge.v_one))-65)
+        #e.append(ord(str(edge.v_two))-65)
+        ed.append(e)
+    print(ed)
+
+    # # data_dict = {
+    #     'khardung la': 0,
+    #     'lachulung la': 0,
+    #     'sasser pass': 0,
+    #     'gyong la': 0,
+    #     'sia la': 0,
+    #     'zoji la': 0,
+    #     'indira col': 0,
+    #     'rezang la': 0,
+    #     'tanglang la': 0,
+    #     'pensi la': 0,
+    #     'marsimik la': 0,
+    # }
     global ChineseBases
     sources = []
     goals = []
+    codes = []
     for bases in ChineseBases:
-        data_dict[bases.lower()] += 1
-    for index, item in enumerate(data_dict.items()):
-        if item[1] != 1:
-            sources.append(index)
-        else:
-            goals.append(index)
-    print(goals)
+        for vertex in Vertex.objects.filter(name=bases.title()):
+            codes.append(vertex.code)
+    print(codes)
+        # data_dict[bases.lower()] += 1
+    # for index, item in enumerate(data_dict.items()):
+        # if item[1] != 1:
+    for code in codes:
+        for i in range(len(labels)):
+            if labels[i] == code:
+                goals.append(i)
+    
+    for i in range(len(labels)):
+        if i not in goals:
+            sources.append(i)
+    labels2=[]
+    for i in range(len(labels)):
+        labels2.append(str(Vertex.objects.filter(code=labels[i]).first().name))
+    #print("labels2"+labels2)
     print(sources)
-    # goals.pop()
+    #goals.pop()
     data_dictionary = {
+        'V': v,
+        'E':ed,
+        'labels':labels,
+        'labels2':labels2,
         'goals': goals,
         'sources': sources
     }
     dataJSON = json.dumps(data_dictionary)
     return render(request, 'graph/graph.html', {'data': dataJSON})
 
+
+@login_required
+def add_node(request):
+    vertices=Vertex.objects.all()
+    v=[]
+    labels=[]
+    for vertex in vertices:
+        v1=[]
+        v1.append(vertex.x_val)
+        v1.append(vertex.y_val)
+        v.append(v1)
+        labels.append(str(vertex.code))
+    #labels.sort()
+    print(v)
+    print(labels)
+    edges=Edge.objects.all()
+    ed=[]
+    for edge in edges:
+        e=[]
+        e.append(labels.index(str(edge.v_one)))
+        e.append(labels.index(str(edge.v_two)))
+        #e.append(ord(str(edge.v_one))-65)
+        #e.append(ord(str(edge.v_two))-65)
+        ed.append(e)
+    print(ed)
+    labels2=[]
+    for i in range(len(labels)):
+        labels2.append(str(Vertex.objects.filter(code=labels[i]).first().name))
+    print("labels2")
+    print(labels2)
+    data_dictionary = {
+        'V': v,
+        'E':ed,
+        'labels':labels,
+        'labels2':labels2
+    }
+    dataJSON = json.dumps(data_dictionary)
+    if request.method == "POST":
+        form = AddNodeForm(request.POST)
+        if form.is_valid():
+            print("form valid")
+            input = form.save(commit=False)
+            vertices=Vertex.objects.all()
+            maxi=0
+            for vertex in vertices:
+                if ord(str(vertex.code))>maxi:
+                    maxi=ord(str(vertex.code))
+            temp=chr(maxi+1)
+            input.code = temp
+            input.save()
+            return redirect('add_node')
+    else:
+        print("form not valid")
+        form = AddNodeForm()
+    return render(request, 'graph/post_addnode.html', {'form': form,'data':dataJSON})
+
+
+@login_required
+def delete_node(request):
+    vertices=Vertex.objects.all()
+    v=[]
+    labels=[]
+    for vertex in vertices:
+        v1=[]
+        v1.append(vertex.x_val)
+        v1.append(vertex.y_val)
+        v.append(v1)
+        labels.append(str(vertex.code))
+    #labels.sort()
+    print(v)
+    print(labels)
+    edges=Edge.objects.all()
+    ed=[]
+    for edge in edges:
+        e=[]
+        e.append(labels.index(str(edge.v_one)))
+        e.append(labels.index(str(edge.v_two)))
+        #e.append(ord(str(edge.v_one))-65)
+        #e.append(ord(str(edge.v_two))-65)
+        ed.append(e)
+    print(ed)
+    labels2=[]
+    for i in range(len(labels)):
+        labels2.append(str(Vertex.objects.filter(code=labels[i]).first().name))
+    print("labels2")
+    print(labels2)
+    data_dictionary = {
+        'V': v,
+        'E':ed,
+        'labels':labels,
+        'labels2':labels2
+    }
+    dataJSON = json.dumps(data_dictionary)
+    if request.method == "POST":
+        print("request is post")
+        form = DeleteNodeForm(request.POST)
+        if form.is_valid():
+            print("Form is valid")
+            print(form.cleaned_data['name'])
+            Vertex.objects.filter(name=form.instance.name).first().delete()
+            return redirect('delete_node')
+        else:
+            print("form not valid")
+    else:
+        
+        form = DeleteNodeForm()
+        
+    return render(request, 'graph/post_deletenode.html', {'form': form,'data':dataJSON})
+
+
+@login_required
+def add_edges(request):
+    vertices=Vertex.objects.all()
+    v=[]
+    labels=[]
+    for vertex in vertices:
+        v1=[]
+        v1.append(vertex.x_val)
+        v1.append(vertex.y_val)
+        v.append(v1)
+        labels.append(str(vertex.code))
+    #labels.sort()
+    print(v)
+    print(labels)
+    edges=Edge.objects.all()
+    ed=[]
+    for edge in edges:
+        e=[]
+        e.append(labels.index(str(edge.v_one)))
+        e.append(labels.index(str(edge.v_two)))
+        #e.append(ord(str(edge.v_one))-65)
+        #e.append(ord(str(edge.v_two))-65)
+        ed.append(e)
+    print(ed)
+    labels2=[]
+    for i in range(len(labels)):
+        labels2.append(str(Vertex.objects.filter(code=labels[i]).first().name))
+    print("labels2")
+    print(labels2)
+    data_dictionary = {
+        'V': v,
+        'E':ed,
+        'labels':labels,
+        'labels2':labels2
+    }
+    dataJSON = json.dumps(data_dictionary)
+    if request.method == "POST":
+        form = AddEdgeForm(request.POST)
+        if form.is_valid():
+            #print(form.cleaned_data['VertexOne'])
+            v_one = Vertex.objects.filter(name=form.cleaned_data['VertexOne']).first()
+            v_two = Vertex.objects.filter(name=form.cleaned_data['VertexTwo']).first()
+            Edge(v_one=v_one, v_two=v_two).save()
+            return redirect('add_edge')
+    else:
+        form = AddEdgeForm()
+    return render(request, 'graph/post_addedge.html', {'form': form,'data':dataJSON})
+
+
+@login_required
+def delete_edges(request):
+    vertices=Vertex.objects.all()
+    v=[]
+    labels=[]
+    for vertex in vertices:
+        v1=[]
+        v1.append(vertex.x_val)
+        v1.append(vertex.y_val)
+        v.append(v1)
+        labels.append(str(vertex.code))
+    #labels.sort()
+    print(v)
+    print(labels)
+    edges=Edge.objects.all()
+    ed=[]
+    for edge in edges:
+        e=[]
+        e.append(labels.index(str(edge.v_one)))
+        e.append(labels.index(str(edge.v_two)))
+        #e.append(ord(str(edge.v_one))-65)
+        #e.append(ord(str(edge.v_two))-65)
+        ed.append(e)
+    print(ed)
+    labels2=[]
+    for i in range(len(labels)):
+        labels2.append(str(Vertex.objects.filter(code=labels[i]).first().name))
+    print("labels2")
+    print(labels2)
+    data_dictionary = {
+        'V': v,
+        'E':ed,
+        'labels':labels,
+        'labels2':labels2
+    }
+    dataJSON = json.dumps(data_dictionary)
+    if request.method == "POST":
+        form = DeleteEdgeForm(request.POST)
+        if form.is_valid():
+            v_one = vtwo = Vertex.objects.filter(name=form.cleaned_data['VertexOne']).first()
+            v_two = vone = Vertex.objects.filter(name=form.cleaned_data['VertexTwo']).first()
+            if Edge.objects.filter(v_one=v_one, v_two=v_two):
+                Edge.objects.filter(v_one=v_one, v_two=v_two).first().delete()
+            else:
+                Edge.objects.filter(v_one=vone, v_two=vtwo).first().delete()
+            return redirect('delete_edge')
+    else:
+        form = DeleteEdgeForm()
+    return render(request, 'graph/post_deleteedge.html', {'form': form,'data':dataJSON})
+
+
+@login_required
+def edit_graph(request):
+    vertices=Vertex.objects.all()
+    v=[]
+    labels=[]
+    for vertex in vertices:
+        v1=[]
+        v1.append(vertex.x_val)
+        v1.append(vertex.y_val)
+        v.append(v1)
+        labels.append(str(vertex.code))
+    #labels.sort()
+    print(v)
+    print(labels)
+    edges=Edge.objects.all()
+    ed=[]
+    for edge in edges:
+        e=[]
+        e.append(labels.index(str(edge.v_one)))
+        e.append(labels.index(str(edge.v_two)))
+        #e.append(ord(str(edge.v_one))-65)
+        #e.append(ord(str(edge.v_two))-65)
+        ed.append(e)
+    print(ed)
+    labels2=[]
+    for i in range(len(labels)):
+        labels2.append(str(Vertex.objects.filter(code=labels[i]).first().name))
+    print("labels2")
+    print(labels2)
+    data_dictionary = {
+        'V': v,
+        'E':ed,
+        'labels':labels,
+        'labels2':labels2
+    }
+    dataJSON = json.dumps(data_dictionary)
+    return render(request, 'graph/edit_graph.html',{'data':dataJSON})
