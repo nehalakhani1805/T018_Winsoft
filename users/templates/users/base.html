@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>CodeIT</title>
+        <!-- Latest compiled and minified CSS -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+        <!-- Popper JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="https://kit.fontawesome.com/f154d53295.js"></script>
+
+        <link href='https://fonts.googleapis.com/css?family=Literata&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+
+    </head>
+    <body>
+        <header class="navbar navbar-expand-md navbar-dark" style="background-color:#3f48cc;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    CheckMate Chinese?
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarToggle">
+
+                    <!-- Navbar Right Side -->
+                    <div class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <a class="nav-item nav-link" href="{% url 'profile'%}">Profile</a>
+                            <a class="nav-item nav-link" href="{% url 'logout'%}">Logout</a>
+                        {% else %}
+                            <a class="nav-item nav-link" href="{% url 'signup'%}">Sign Up</a>
+                            <a class="nav-item nav-link" href="{% url 'login' %}">Log In</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </header>
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    <script>
+                        alert("Your account has been created.You can now login");
+                    </script>
+                {% else %}
+                    <script>
+                        alert("You have updated your information ");
+                    </script>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+
+
+    </body>
+</html>
