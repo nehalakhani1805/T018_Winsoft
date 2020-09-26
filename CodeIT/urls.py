@@ -20,6 +20,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from users import views as user_views
+from graph import views as graph_views
+
 
 urlpatterns = [
     path('',auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
@@ -28,6 +30,9 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path('signup/', user_views.signup, name='signup'),
     path('profile/', user_views.profile, name='profile'),
+    path('graph/', graph_views.view_graph, name='view_graph'),
+    path('input/', graph_views.post_new, name='input'),
+
 
 ]
 
