@@ -303,6 +303,7 @@ function calcWeights() {
   var W = new Array(E.length);
   for (var i=0;i<W.length;i++) {
     W[i] = dist(V[E[i][0]][0], V[E[i][0]][1], V[E[i][1]][0], V[E[i][1]][1]);
+    W[i] = W[i] + (E[i][2]*0.15*W[i])
   }
   return W;
 }
@@ -435,7 +436,8 @@ function plotNodes(source, goal) {
 }
                     
                     </script>
-                   
+                   <button class="btn btn-outline-info btn-set-primary"  ><a href ="{% url 'home' %}" >Back</a></button>
+                   <br><br>
 				</div>
                 <br>
 			</div>

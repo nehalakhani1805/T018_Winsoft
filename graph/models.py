@@ -27,6 +27,7 @@ class Vertex(models.Model):
 class Edge(models.Model):
     v_one = models.ForeignKey('Vertex',on_delete=models.CASCADE, null=True, related_name='vertexone')
     v_two = models.ForeignKey('Vertex',on_delete=models.CASCADE,null=True, related_name='vertextwo')
+    diff = models.IntegerField(default=0)
     
     def __str__(self):
         return str(self.v_one) + '-'+ str(self.v_two)

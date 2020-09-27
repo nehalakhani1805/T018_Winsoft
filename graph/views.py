@@ -140,6 +140,7 @@ def view_graph(request):
         e=[]
         e.append(labels.index(str(edge.v_one)))
         e.append(labels.index(str(edge.v_two)))
+        e.append(int(edge.diff))
         #e.append(ord(str(edge.v_one))-65)
         #e.append(ord(str(edge.v_two))-65)
         ed.append(e)
@@ -369,7 +370,6 @@ def delete_node(request):
         
     return render(request, 'graph/post_deletenode.html', {'form': form,'data':dataJSON})
 
-
 @login_required
 def add_edges(request):
     vertices=Vertex.objects.all()
@@ -412,7 +412,8 @@ def add_edges(request):
             #print(form.cleaned_data['VertexOne'])
             v_one = Vertex.objects.filter(name=form.cleaned_data['VertexOne']).first()
             v_two = Vertex.objects.filter(name=form.cleaned_data['VertexTwo']).first()
-            Edge(v_one=v_one, v_two=v_two).save()
+            diff = form.cleaned_data['diff']
+            Edge(v_one=v_one, v_two=v_two, diff=diff).save()
             return redirect('add_edge')
     else:
         form = AddEdgeForm()

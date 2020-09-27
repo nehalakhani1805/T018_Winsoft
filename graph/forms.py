@@ -20,6 +20,7 @@ class DeleteNodeForm(forms.ModelForm):
 class AddEdgeForm(forms.Form):
     VertexOne = forms.CharField(max_length=20)
     VertexTwo = forms.CharField(max_length=20)
+    diff = forms.IntegerField()
 
 class DeleteEdgeForm(forms.Form):
     VertexOne = forms.CharField(max_length=20)
