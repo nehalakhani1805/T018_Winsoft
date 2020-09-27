@@ -190,6 +190,12 @@ Basic input element using psuedo classes
 */
 
 
+h2{
+	font-family: 'Lora', sans-serif;
+	color: grey;
+}
+
+
 input,
 span,
 label,
@@ -337,14 +343,15 @@ input.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input
 
 
 
-
+html { overflow-y: scroll; }
+/*body { position: absolute; }*/
 
 body {
 	background-color: #ccefff;
 	overflow: hidden;
 	{#margin: 5% auto 0 auto;#}
-  width: 100%;
-  {#max-width: 1125px;#}
+  /*width: 100%;*/
+  /*{#max-width: 1125px;#}*/
 }
 
 #scramble-text {
@@ -352,7 +359,7 @@ body {
 	font-family: 'Roboto', sans-serif;
 	position: absolute;
   	left: 50%;
-  	margin-top: 100px;
+  	margin-top: 80px;
 	transform: translate(-50%, -50%);
 	color: red	;		/*#2196f3;*/
 	display: flex;
@@ -395,7 +402,7 @@ body {
     top: 50px;
     font-family: "proxima-nova", sans-serif;
     font-weight: 500;
-    font-size: 8px;
+    font-size: 14px;
     text-transform: uppercase!important;
     letter-spacing: 2px;
     color: black;
@@ -481,6 +488,23 @@ body {
   opacity:1;
   width: 120%;
 }
+
+
+
+
+.bottomdiv
+{
+ /*position: absolute;*/
+/* left:    0;
+ right:   0;*/
+ z-index : 100;
+ filter : alpha(opacity=100);
+ /*POSITION: fixed;*/
+ /*bottom: 0;*/
+}
+.hide {
+ display: none;
+}
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
@@ -514,38 +538,53 @@ body {
         </header>
 
 
-<form method="POST" action='/input/'>
+<form method="POST" action='/input/' style="margin-left: 20px">
   {% csrf_token %}
   <input type="text" name="key" class="question" id="key" required autocomplete="off" />
   <label for="nme"><span>What's the Key?</span></label>
   <input type="text" name="enc_string" class="question" id="enc_string" style="margin-top: 100px" required autocomplete="off"/>
-  <label for="msg"><span>What's the Encoded Messege?</span></label>
+  <label for="msg"><span>What's the Encoded Message?</span></label>
   
-  <a href="#0" class="btn10">
-    <button type = "submit">Decode</button>
+  <button class="btn10" type="submit" >
+    Decode
     <div class="transition"></div>
-  </a>
-  <a href="{% url 'view_graph'%}"  class="btn10">
-    <button>Graphs</button>
+  </button>
+  
+  <a class="btn10" href="{% url 'view_graph'%}" >
+    Graphs
     <div class="transition"></div>
   </a>
 
   <!-- <button type="submit" value="Submit!">Svr</button -->
 </form>
-
         
+
+
+<br><br><br><br>
+
+<h2 style="margin-left: 20px">Decrypted Text:-</h2>
+
     <div id="scramble-text"></div>
     <br>
     <br>
-    <div>
+
+
+    <div class="bottomdiv hide" style="margin-top: 120px; margin-left:20px" id='china'>
+    	<h2>China Bases:-</h2>
       {% for base in ChineseBases %}
-      <h3>{{base}}</h3>
+      <h3 style="font-family: 'Lora', sans-serif; text-transform: capitalize">{{base}} </h3>
       {% endfor %}
     </div>
     
-	<!-- <div id = "something"></div>  -->
+	<!-- <div id = "something">      CHANGE TIME HERE</div>  -->
   <script>
-      
+      setTimeout(function(){
+ document.getElementById('china').classList.remove('hide');
+}, 10000);
+
+
+
+
     function genString() {
       let len = anime.random(10, 69)
       let arr = new Uint8Array(len)
@@ -589,7 +628,7 @@ body {
       }
       
       // https://easings.net
-      return anime.timeline({duration: 2000, easing: 'easeInOutCubic'})
+      return anime.timeline({duration: 1000, easing: 'easeInOutCubic'})
       .add({targets: rems, width: 0})
       .add({targets: adds, opacity: [0, 1], width: [0, el => el.offsetWidth]}, 0)
       .add({targets: adds, color: '#2196f3', duration: 300})

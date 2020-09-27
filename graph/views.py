@@ -16,8 +16,62 @@ ChineseBases = ''
 def home(request):
     return render(request, 'graph/home.html')
 
+#  data = dMessage.lower()
+#             predictor = flair.data.Sentence(data)
+#             flair_sentiment.predict(predictor)
+#             total_sentiment = predictor.labels
+#             data_dict = {
+#                 'khardung la': 0,
+#                 'lachulung la': 0,
+#                 'sasser pass': 0,
+#                 'gyong la': 0,
+#                 'sia la': 0,
+#                 'zoji la': 0,
+#                 'indira col': 0,
+#                 'rezang la': 0,
+#                 'tanglang la': 0,
+#                 'pensi la': 0,
+#                 'marsimik la': 0,
+#                 'not': 0,
+#                 "haven't": 0,
+#                 "didn't": 0,
+#                 "couldn't": 0
+#             }
+#             not_words = ['not', "haven't", "didn't", "couldn't"]
+#             vertices=Vertex.objects.all()
+#             all_chini_places = []
+#             for vertex in vertices:
+#                 temps = str(vertex.name).lower()
+#                 all_chini_places.append(temps)
+#             # all_chini_places = ['khardung la', 'lachulung la', 'sasser pass', 'gyong la', 'sia la', 'zoji la',
+#                                 # 'indira col', 'rezang la', 'tanglang la', 'pensi la', 'marsimik la']
+#             chini_places = []
+
+#             flag = 0
+#             if("POSITIVE" in str(total_sentiment[0])):
+#                 print("Positive sentiment detected")
+#                 flag = 1
+#                 for i in all_chini_places:
+#                     if i in data:
+#                         chini_places.append(i)
+#                 # for i in data_dict.keys():
+#                 #     if i in data:
+#                 #         data_dict[i] += 1
+#                 #         chini_places.append(i)
+#             elif("NEGATIVE" in str(total_sentiment[0])):
+#                 print("Negative sentiment detected")
+#                 flag = 1
+#             print(chini_places)
+#             # for i in data_dict.keys():
+#             #     if i in data:
+#             #         data_dict[i] += 1
+#             #         chini_places.append(i)
+#             #     if i in data and i in not_words:
+#             #         flag += 1
 @login_required
 def post_new(request):
+    import flair
+    flair_sentiment = flair.models.TextClassifier.load('en-sentiment')
     global ChineseBases
     global dMessage
     if request.method == "POST":
@@ -66,47 +120,34 @@ def post_new(request):
             dMessage = s
 
             data = dMessage.lower()
-            data_dict = {
-                'khardung la': 0,
-                'lachulung la': 0,
-                'sasser pass': 0,
-                'gyong la': 0,
-                'sia la': 0,
-                'zoji la': 0,
-                'indira col': 0,
-                'rezang la': 0,
-                'tanglang la': 0,
-                'pensi la': 0,
-                'marsimik la': 0,
-                'not': 0,
-                "haven't": 0,
-                "didn't": 0,
-                "couldn't": 0
-            }
-            not_words = ['not', "haven't", "didn't", "couldn't"]
+            predictor = flair.data.Sentence(data)
+            flair_sentiment.predict(predictor)
+            total_sentiment = predictor.labels
+
             vertices=Vertex.objects.all()
             all_chini_places = []
             for vertex in vertices:
-                all_chini_places.append(str(vertex.name))
+                all_chini_places.append(str(vertex.name).lower())
             # all_chini_places = ['khardung la', 'lachulung la', 'sasser pass', 'gyong la', 'sia la', 'zoji la',
                                 # 'indira col', 'rezang la', 'tanglang la', 'pensi la', 'marsimik la']
             chini_places = []
-
-            flag = 0
-
-            for i in data_dict.keys():
+            other_places = []
+            for i in all_chini_places:
                 if i in data:
-                    data_dict[i] += 1
                     chini_places.append(i)
-                if i in data and i in not_words:
-                    flag += 1
+                else:
+                    other_places.append(i)
+            flag = 0
+            if("POSITIVE" in str(total_sentiment[0])):
+                print("Positive sentiment detected")
+                flag = 0
+            elif("NEGATIVE" in str(total_sentiment[0])):
+                print("Negative sentiment detected")
+                flag = 1
 
             if flag % 2 == 1:
-                for place in all_chini_places:
-                    if place in chini_places:
-                        all_chini_places.remove(place)
-                print(all_chini_places)
-                ChineseBases = all_chini_places
+                print(other_places)
+                ChineseBases = other_places
             else:
                 print(chini_places)
                 ChineseBases = chini_places
