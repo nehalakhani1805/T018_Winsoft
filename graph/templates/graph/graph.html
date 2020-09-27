@@ -1,5 +1,6 @@
 {% extends 'users/base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% block content %}
 	<main role="main" class="container">
         <div class="row">
@@ -436,8 +437,12 @@ function plotNodes(source, goal) {
 }
                     
                     </script>
-                   <button class="btn btn-outline-info btn-set-primary"  ><a href ="{% url 'home' %}" >Back</a></button>
+                    
+                   <a class="btn btn-outline-info btn-set-primary"  href ="{% url 'home' %}" >Back</a>
                    <br><br>
+                   <h1 style="text-align:center;">Best Base Graph </h1>
+                   <img src="{% static 'img/key.jpeg' %}" style=" height:100px; width:175px"alt="My image">
+                   <br>
 				</div>
                 <br>
 			</div>

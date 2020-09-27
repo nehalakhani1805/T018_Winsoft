@@ -52,12 +52,12 @@
 	}
 	</script>
 					</div>
-				    <h2>Add base</h2>
+				    <h2>Add Base</h2>
 				    <form method="POST" class="post-form">
 				    	{% csrf_token %}
 				        {{ form|crispy }}
 						<button class="btn btn-outline-info btn-set-primary"  type="submit" >Save</button>
-						<button class="btn btn-outline-info btn-set-primary"  ><a href ="{% url 'edit_graph' %}" >Back</a></button>
+						<a class="btn btn-outline-info btn-set-primary"  href ="{% url 'edit_graph' %}" >Back</a>
 				    </form>
 
 				</div>
