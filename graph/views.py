@@ -183,6 +183,46 @@ def view_graph(request):
     #print("labels2"+labels2)
     print(sources)
     #goals.pop()
+    pr=[]
+    sz=[]
+    for i in range(len(v)):
+        #pr.append(v[i])
+        pr.append(i)
+        sz.append(1)
+    for i in range(len(ed)):
+        #union(pr,ed[i][0],ed[i][1],v)
+        union(pr,ed[i][0],ed[i][1],sz)
+
+    #for i in len(pr):
+    print("pr values")
+    print(pr)
+    flag=False
+    print("goals[0]")
+    print(goals)
+    temp=pr[goals[0]]
+    for i in range(len(goals)):
+        if pr[goals[i]]!=temp:
+            flag=True
+            break
+    diction={}
+    if flag==True:
+        for i in range(len(goals)):
+            if pr[goals[i]] in diction:
+                diction[pr[goals[i]]].append(goals[i])
+            else:
+                diction[pr[goals[i]]]=[]
+                diction[pr[goals[i]]].append(goals[i])
+        maxi=0
+        max_key=0
+        for key in diction:
+            if len(diction[key])>maxi:
+                maxi=len(diction[key])
+                max_key=key
+        goals=diction[max_key]
+        sources=[]
+        for i in range(len(labels)):
+            if i not in goals:
+                sources.append(i)
     data_dictionary = {
         'V': v,
         'E':ed,
@@ -191,10 +231,36 @@ def view_graph(request):
         'goals': goals,
         'sources': sources
     }
+    print("goals")
+    print(goals)
     dataJSON = json.dumps(data_dictionary)
     return render(request, 'graph/graph.html', {'data': dataJSON})
 
+def root(pr,r):#,v):
+    r2=r
+    while pr[r2]!=r2:
+        #v[r]=p[r]
+        #pr[r]=pr[pr[r]]
+        r2=pr[r2]
+    
+    while r != r2:
+        node_in_way = pr[r]
+        pr[r] = r2
+        r = node_in_way
 
+    #return v[r]
+    return r2
+def union(pr,q,r,sz):
+    r1=root(pr,q)#,v)
+    r2=root(pr,r)#,v)
+    
+    if(r1!=r2):
+        if sz[r1]>sz[r2]:
+            pr[r2]=r1
+            sz[r1]+=sz[r2]
+        else:
+            pr[r1]=r2
+            sz[r2]+=sz[r1]
 @login_required
 def add_node(request):
     vertices=Vertex.objects.all()
